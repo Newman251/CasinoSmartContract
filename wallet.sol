@@ -20,19 +20,22 @@ contract bank is mortal{
 
     uint rate = 10;
 
+    constructor (uint casinoInitialisationBalance) public {
+
+        require(casinoInitialisationBalance > 10000, "You must invest more than 10000");
+        tokenList memory newTokenList = tokenList(msg.sender, casinoInitialisationBalance/rate);
+        tokenLists.push(newTokenList);
+        
+    }
+
     function buyTokens() external payable{
 
         require(msg.value > rate*10, "Too low, cost must be greater then 100");
         require(msg.value <= rate*200, "Too high, cost must be less then 2000");
 
         uint256 tokens;
-        //uint256 ownerBalance;
         tokens = (msg.value/rate);
 
-        // constructor (string memory ownerBalanceIn) public {
-        //     owner = msg.sender;
-        //     ownerBalance = ownerBalanceIn;
-        //  }
         if(tokenLists.length==0){
             tokenList memory newTokenList = tokenList(msg.sender, tokens);
             tokenLists.push(newTokenList);
@@ -57,7 +60,7 @@ contract bank is mortal{
     }
 
 
-    	function status() public view returns (address[] memory, uint256[] memory) {
+    function status() public view returns (address[] memory, uint256[] memory) {
 	    address[] memory allAccounts = new address[](tokenLists.length);
 	    uint256[] memory allAmounts = new uint256[](tokenLists.length);
 	    
