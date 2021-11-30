@@ -22,15 +22,40 @@ contract bank is mortal{
 
     function buyTokens() external payable{
 
-      //  require(investmentIsOpen, "Investment is closed");
+        require(msg.value > rate*10, "Too low, cost must be greater then 100");
+        require(msg.value <= rate*200, "Too high, cost must be less then 2000");
 
         uint256 tokens;
-        tokens = ( rate * msg.value);
+        //uint256 ownerBalance;
+        tokens = (msg.value/rate);
 
-        tokenList memory newTokenList = tokenList(msg.sender, tokens);
-        tokenLists.push(newTokenList);
+        // constructor (string memory ownerBalanceIn) public {
+        //     owner = msg.sender;
+        //     ownerBalance = ownerBalanceIn;
+        //  }
+        if(tokenLists.length==0){
+            tokenList memory newTokenList = tokenList(msg.sender, tokens);
+            tokenLists.push(newTokenList);
+        }
+        
+        else{
 
+        bool userFound;
+
+        for (uint i = 0; i < tokenLists.length; i++) {
+	        if(tokenLists[i].userId == msg.sender){
+                  tokenLists[i].amount += tokens;
+                  userFound = true;  
+            }  
+	    }
+            if(!userFound){
+                tokenList memory newTokenList = tokenList(msg.sender, tokens);
+                tokenLists.push(newTokenList);
+            }
+                 userFound = false;
+        }
     }
+
 
     	function status() public view returns (address[] memory, uint256[] memory) {
 	    address[] memory allAccounts = new address[](tokenLists.length);
