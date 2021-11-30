@@ -31,7 +31,7 @@ contract bank is mortal{
     function buyTokens() external payable{
 
         require(msg.value > rate*10, "Too low, cost must be greater then 100");
-        require(msg.value <= rate*200, "Too high, cost must be less then 2000");
+        require(msg.value <= rate*1000, "Too high, cost must be less then 10000");
 
         uint256 tokens;
         tokens = (msg.value/rate);
