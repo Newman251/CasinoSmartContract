@@ -219,4 +219,73 @@ contract casino is mortal{
             tokenLists[index].amount -= stake;
         }
     }
+
+// ----------------------------------Roulette Functions-------------------------------------
+    uint rouletteNumber;
+    string rouletteColour;
+    uint winRoulette;
+
+    function printRouletteNumber() public view returns (uint){
+        return rouletteNumber;
+    }
+    function printRouletteColour() public view returns (string memory){
+        return rouletteColour;
+    }
+    function printRouletteWinnings() public view returns (uint){
+        return winRoulette;
+    }
+
+
+    function StartGameRoulette (uint number, string memory colour, uint stake) public {
+
+    require(number > 0, "You must guess between 1 and 36"); //If number is too low
+    require(number <= 36 , "You must guess between 1 and 36"); //If number is too high
+    //checking to see if the colour guess is right
+    require(keccak256(bytes(colour)) == keccak256(bytes("r")) || keccak256(bytes(colour)) == keccak256(bytes("b"))  , "You must guess between 1 and 36");
+    require(bidIsUnderLimit(stake), "Your bid is not in the range of allowed bids!"); //checking if stake is ok
+
+
+        address playerID = msg.sender; //same as dice
+        uint256 numCustomers = getNumberCustomers(); //same as dice
+        uint256 index; //same as Dice
+        uint colourMatchMmultiplier;
+        uint numberMatchMmultiplier;
+        winRoulette = stake;
+        colourMatchMmultiplier = 2;
+        numberMatchMmultiplier = 30;
+        for (uint256 i = 0; i < numCustomers; i++){ //check number of customers
+            if(tokenLists[i].userId == playerID){
+                index = i;
+            }
+        }
+        uint rOrB; 
+        rOrB = randomGenerate(2) + 1; //generating random colour
+        if(rOrB == 1){rouletteColour = "r";}else{rouletteColour = "b";} //converting to colour
+        rouletteNumber = randomGenerate(37); //generating random number (0-36)
+
+        if (keccak256(bytes(colour)) == keccak256(bytes(rouletteColour))){ //assigning winnings if colour guessed right
+            winRoulette = winRoulette*colourMatchMmultiplier;
+            tokenLists[index].amount += winRoulette; 
+            tokenLists[0].amount -= winRoulette;
+        }
+        if (number == rouletteNumber){// assigning winning if number guessed right
+            winRoulette = winRoulette*numberMatchMmultiplier;
+            tokenLists[index].amount += winRoulette; 
+            tokenLists[0].amount -= winRoulette;
+        }
+//if both colour and number are guessed right, multiply winnings by two
+        if (number == rouletteNumber && keccak256(bytes(colour)) == keccak256(bytes(rouletteColour))){ 
+            winRoulette = 2*(winRoulette*colourMatchMmultiplier + winRoulette*numberMatchMmultiplier);
+            tokenLists[index].amount += winRoulette; 
+            tokenLists[0].amount -= winRoulette;
+            tokenLists[index].amount += winRoulette; 
+            tokenLists[0].amount -= winRoulette;
+        }
+//check to see if user has lost then subtract the stake if so
+        if (number != rouletteNumber && (keccak256(bytes(colour)) != keccak256(bytes(rouletteColour)))){
+            tokenLists[0].amount += stake;
+            tokenLists[index].amount -= stake;
+            winRoulette = 0;
+        }
+    }
 }
