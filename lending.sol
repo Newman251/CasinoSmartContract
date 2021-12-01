@@ -240,9 +240,34 @@ contract lending is mortal {
         debtBalances[myAdress] -= amountInToken;
 
         //remove amount from my casino token account
+        for (uint i = 0; i < tokenLists.length; i++) {
+            if (tokenLists[i].userId == myAdress){
+                tokenLists[i].amount -= amountInToken;
+            }
+        }
 
         //remove my loan from acceptedLoans if I paid it back in full
-
+        if (debtBalances[myAdress] == 0){
+            for (uint i = 0; i < acceptedLoans.length; i++){
+                if (acceptedLoans[i].account == myAdress){
+                    if (acceptedLoans.length > 1){
+                        delete acceptedLoans[i];
+                        acceptedLoans[i] = acceptedLoans[acceptedLoans.length-1];
+                        delete acceptedLoans[acceptedLoans.length-1];
+                        acceptedLoans.length--;
+                    } else {
+                        delete acceptedLoans[i];
+                        acceptedLoans.length--;
+                    }
+                }
+            }
+        } else {
+            for (uint i = 0; i < acceptedLoans.length; i++){
+                if (acceptedLoans[i].account == myAdress){
+                    acceptedLoans[i].amountToPayBack -= amountInToken;
+                }
+            }
+        }
     }
 
 
@@ -251,17 +276,17 @@ contract lending is mortal {
 	    address[] memory allAccounts = new address[](requestedLoans.length);
 	    uint256[] memory allLoanAmounts = new uint256[](requestedLoans.length);
 	    uint256[] memory allInterestRates = new uint256[](requestedLoans.length);
-	    uint256[] memory allDebtBalances = new uint256[](requestedLoans.length);
+	    uint256[] memory allAmountToPayBack = new uint256[](requestedLoans.length);
 	    
 	    
 	    for (uint i = 0; i < requestedLoans.length; i++) {
 	        allAccounts[i] = requestedLoans[i].account;
 	        allLoanAmounts[i] = requestedLoans[i].amountLended;
 	        allInterestRates[i] = requestedLoans[i].interestRate;
-	        allDebtBalances[i] = debtBalances[requestedLoans[i].account];
+	        allAmountToPayBack[i] = requestedLoans[i].amountToPayBack;
 	    }
 	    
-	    return (allAccounts, allLoanAmounts, allInterestRates, allDebtBalances);
+	    return (allAccounts, allLoanAmounts, allInterestRates, allAmountToPayBack);
 	}
 
     // get the status of accepted loans
@@ -269,16 +294,16 @@ contract lending is mortal {
 	    address[] memory allAccounts = new address[](acceptedLoans.length);
 	    uint256[] memory allLoanAmounts = new uint256[](acceptedLoans.length);
 	    uint256[] memory allInterestRates = new uint256[](acceptedLoans.length);
-	    uint256[] memory allDebtBalances = new uint256[](acceptedLoans.length);
+	    uint256[] memory allAmountToPayBack = new uint256[](acceptedLoans.length);
 	    
 	    
 	    for (uint i = 0; i < acceptedLoans.length; i++) {
 	        allAccounts[i] = acceptedLoans[i].account;
 	        allLoanAmounts[i] = acceptedLoans[i].amountLended;
 	        allInterestRates[i] = acceptedLoans[i].interestRate;
-	        allDebtBalances[i] = debtBalances[acceptedLoans[i].account];
+	        allAmountToPayBack[i] = acceptedLoans[i].amountToPayBack;
 	    }
 	    
-	    return (allAccounts, allLoanAmounts, allInterestRates, allDebtBalances);
+	    return (allAccounts, allLoanAmounts, allInterestRates, allAmountToPayBack);
 	}
 }
