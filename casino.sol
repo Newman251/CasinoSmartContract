@@ -82,8 +82,8 @@ contract casino is mortal{
     }
 
     //Returns the balance of the person who calls the function
-    function getMyAccountBalance() internal view returns (uint256){
-        getAccountBalance(msg.sender);
+    function getMyAccountBalance() external view returns (uint256){
+        return(getAccountBalance(msg.sender));
     }
 
 	//Make sure the bid is under the casino's stake limit
@@ -235,6 +235,7 @@ contract casino is mortal{
     }
 
 // ----------------------------------Roulette Functions-------------------------------------
+
     uint rouletteNumber;
     string rouletteColour;
     uint winRoulette;
