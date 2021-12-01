@@ -150,17 +150,8 @@ contract casino is mortal{
         slots[0] = slotRoll();
         slots[1] = slotRoll2();
         slots[2] = slotRoll3();
-        
         //if statements for checking if two numbers on the slot machine match
-        if (slots[0] == slots[1] && slots[2] != slots[1]){
-            tokenLists[index].amount += winSlots; 
-            tokenLists[0].amount -= winSlots;
-        }
-        if (slots[0] == slots[2] && slots[2] != slots[1]){
-            tokenLists[index].amount += winSlots; 
-            tokenLists[0].amount -= winSlots;
-        }
-        if (slots[1] == slots[2] && slots[0] != slots[1]){
+        if (slots[0] == slots[1] && slots[2] != slots[1] || slots[0] == slots[2] && slots[2] != slots[1] || slots[1] == slots[2] && slots[0] != slots[1]){
             tokenLists[index].amount += winSlots; 
             tokenLists[0].amount -= winSlots;
         }
