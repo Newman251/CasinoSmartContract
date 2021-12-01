@@ -221,7 +221,7 @@ contract lending is mortal {
 
 
     function payBack (address myAdress, uint amountInToken) public payable{
-        require(amountInToken < debtBalances[myAdress], "You cannot pay back more than you lent");
+        require(amountInToken <= debtBalances[myAdress], "You cannot pay back more than you lent");
         
         uint256 myBalance;
 
