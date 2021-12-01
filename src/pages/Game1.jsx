@@ -11,69 +11,19 @@ import {
   Message
 } from "semantic-ui-react";
 
-import logo from '../images/diceroll.png'; // Tell webpack this JS file uses this image
+import logo from '../images/diceroll.png'; 
 import '../App.css';
 
 
-//import web3 from "../ethereum/web3";
-//import dice from "../ethereum/_dice";
-//import { Link, Router } from "../routes";
 
 class Game1 extends Component {
  
    
       
 
-//   state = { open: false,
-//             value: "",
-//             errorMessage: "",
-//             loading: false,
-//             number: ""
-// };
-
-//   show = size => () => this.setState({ size, open: true });
-//   close = () => this.setState({ open: false });
-
-  
-
-//   onClick = async event => {
-
-//       event.preventDefault();
-//       this.setState({ loading: true})
-    
-   
-    
-//     this.setState({ errorMessage: "", loading: true });
-  
-
-//     const total = this.state.value * 100000000000000000;
-   
-//     const num = this.state.number;
-
-
-//     try {
-//       const accounts = await web3.eth.getAccounts();
-//         await dice.methods.rollDice(num).send({
-//           from: accounts[0],
-//           value: total,
-//           gasLimit: 500000
-//         });
-//       }
-      
-    
-//     catch (err) {
-//       this.setState({ errorMessage: err.message.split("\n")[0] });
-//     }
-   
-//     this.setState({ loading: false, open: false})
-//     Router.pushRoute(`/dice`);
-//     this.render();
-//     this.close();
-
-//   };
 
   render() {
-   // const { open, size } = this.state;
+   
 
 
    function sayHello() {
@@ -111,26 +61,7 @@ class Game1 extends Component {
                     />
                 <button onClick={sayHello}>PLAY</button>
              
-                  {/* <Button.Group color="grey">
-                  <Button onClick={event => this.setState({ value: 0.01 })}>
-                  {"0.01 ETH"}
-                </Button>
-                <Button onClick={event => this.setState({ value: 0.1 })}>
-                  {"0.1 ETH"}
-                </Button>
-                <Button onClick={event => this.setState({ value: 0.25 })}>
-                  {"0.25 ETH"}
-                </Button>
-                <Button onClick={event => this.setState({ value: 0.5 })}>
-                  {"0.5 ETH"}
-                </Button>
-                <Button onClick={event => this.setState({ value: 1 })}>
-                  {"1 ETH"}
-                
-                  </Button>
-                  </Button.Group> */}
-                  
-            
+                 
                 <br/>
            
           
