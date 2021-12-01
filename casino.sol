@@ -298,4 +298,204 @@ contract casino is mortal{
             winRoulette = 0;
         }
     }
+
+// ---------------------Blackjack Functions--------------------------------------
+
+    string[] possibleCards = ["2","3","4","5","6","7","8","9","Jack","Queen", "King", "Ace"];
+    uint[] possibleValues =  [ 2,  3,  4,  5,  6,  7,  8,  9,  10,    10,      10,     11  ];
+
+    struct blackJackGame{
+        address playerID;
+        uint256[] dealerCards;
+        uint256[] gamblerCards;
+        uint256 stake;
+    }
+    
+
+    blackJackGame[] blackJackGames;// = new blackJackGame[](10);
+
+    function getNumberBlackjackGames() private view returns (uint256){
+        return blackJackGames.length;
+    }
+
+    function noGameRunning(address playerID) private view returns (bool){
+        for (uint256 i = 0; i < getNumberBlackjackGames(); i++){     //Determine if there is a game by this player
+            if(blackJackGames[i].playerID == playerID){
+                return false;
+            }
+        }
+        return true;
+    }
+    function getGameIndex(address playerID) private view returns (uint256){
+        uint256 gameIndex = 0;
+        for (uint256 i = 0; i < getNumberBlackjackGames(); i++){     
+            if(blackJackGames[i].playerID == playerID){
+                gameIndex = i;
+                return gameIndex;
+            }
+        }
+        return gameIndex;
+    }
+
+    function uint2str(uint _i) internal pure returns (string memory _uintAsString) {
+        if (_i == 0) {
+            return "0";
+        }
+        uint j = _i;
+        uint len;
+        while (j != 0) {
+            len++;
+            j /= 10;
+        }
+        bytes memory bstr = new bytes(len);
+        uint k = len;
+        while (_i != 0) {
+            k = k-1;
+            uint8 temp = (48 + uint8(_i - _i / 10 * 10));
+            bytes1 b1 = bytes1(temp);
+            bstr[k] = b1;
+            _i /= 10;
+        }
+        return string(bstr);
+    }
+
+    function getRandomCard() private view returns (uint256){
+        uint cardResult = randomGenerate(11);
+        return cardResult;
+    }
+    function getNameOfCard(uint256 cardValue) private view returns (string memory){
+        return possibleCards[cardValue];
+    }
+
+    function getIndexOfGambler(address playerID) private view returns (uint256){
+        uint256 index;          
+        uint256 numCustomers = getNumberCustomers();                        //The users index in the casino's tokenLists
+        for (uint256 i = 0; i < numCustomers; i++){                         //Determine the index of the gambler in the tokenLists
+            if(tokenLists[i].userId == playerID){
+                index = i;
+            }
+        }
+        return index;
+    }
+
+    function StartGameBlackjack (uint256 stake) public{
+        address playerID = msg.sender; 
+        require(enoughMoneyForBid(stake, stake, playerID));
+        tokenLists[0].amount -= stake; //Substract stake, it is in the game newTokenList
+        uint256 playerTokenID = getIndexOfGambler(msg.sender);
+        tokenLists[playerTokenID].amount -= stake;
+        uint256[] memory dealerCardsNew = new uint256[](1);
+        uint256[] memory gamblerCardsNew = new uint256[](2);
+        
+        require(noGameRunning(playerID), "You already play a game");
+        uint256 playerIndex;                                    //The users index in the casino's tokenLists
+        for (uint256 i = 0; i < getNumberCustomers(); i++){     //Determine the index of the gambler in the tokenLists
+            if(tokenLists[i].userId == playerID){
+                playerIndex = i;
+            }
+        }
+            
+        //draw first card
+        gamblerCardsNew[0] = getRandomCard();
+        //draw second card
+        gamblerCardsNew[0] = getRandomCard();
+        //draw dealer card
+        dealerCardsNew[0] = getRandomCard();
+
+        blackJackGame memory game = blackJackGame(msg.sender, dealerCardsNew, gamblerCardsNew, stake);
+        blackJackGames.push(game);
+    }
+    function deleteGame(uint256 gameIndex) private{
+        //blackJackGames[gameIndex] = blackJackGames[blackJackGames.length - 1];
+        //delete blackJackGames[blackJackGames.length - 1];
+        //blackJackGames.length--;
+       delete blackJackGames[gameIndex];
+    }
+
+    function lost(uint256 gameIndex, uint256 stake) private{
+        tokenLists[0].amount += 2*stake;
+        deleteGame(gameIndex);
+    }
+
+    function win(uint256 gameIndex, address gamblerAddress, uint256 stake) private{
+        uint256 index = getIndexOfGambler(gamblerAddress);
+        tokenLists[index].amount += 2*stake;
+        deleteGame(gameIndex);
+    }
+
+    function tie(uint256 gameIndex, address gamblerAddress, uint256 stake) private{
+        uint256 index = getIndexOfGambler(gamblerAddress);
+        tokenLists[0].amount += stake;
+        tokenLists[index].amount += stake;
+        deleteGame(gameIndex);
+    }
+
+    function draw1Card() public{
+        uint256 gameIndex = getGameIndex(msg.sender);
+        uint256 newCardValue = getRandomCard();
+        blackJackGames[gameIndex].gamblerCards.push(newCardValue);
+        if(calculateValueOfHand(gameIndex, true) == 21){win(gameIndex, msg.sender, blackJackGames[gameIndex].stake);}
+        if(calculateValueOfHand(gameIndex, true) > 21){lost(gameIndex, blackJackGames[gameIndex].stake);}
+    }
+
+    function calculateValueOfHand(uint256 gameIndex, bool gambler) private view returns (uint256){
+        uint256[] memory valuesIndizes;
+        if(gambler){
+            valuesIndizes = blackJackGames[gameIndex].gamblerCards;
+        }
+        else{
+            valuesIndizes = blackJackGames[gameIndex].dealerCards;
+        }
+        uint256 entireValue = 0;
+        for (uint256 i=0; i<valuesIndizes.length; i++){
+            entireValue += possibleValues[valuesIndizes[i]];
+        }
+        return entireValue;
+    }
+    function calculateBothHands() public view returns(uint256[2] memory){
+        uint256 gameIndex = getGameIndex(msg.sender);
+        uint256[2] memory returnValues;
+        returnValues[0] = calculateValueOfHand(gameIndex, true);
+        returnValues[1] = calculateValueOfHand(gameIndex, false);
+        return (returnValues);
+    }
+    function calculateBothHands(uint256 gameIndex) private view returns(uint256[2] memory){
+        uint256[2] memory returnValues;
+        returnValues[0] = calculateValueOfHand(gameIndex, true);
+        returnValues[1] = calculateValueOfHand(gameIndex, false);
+        return (returnValues);
+    }
+
+    //Only for devellopping
+    function getAllHands() private view returns(uint[] memory, uint[] memory){
+        uint256[] memory handsGamblers = new uint256[](blackJackGames.length);
+        uint256[] memory handsDealer = new uint256[](blackJackGames.length);
+        for(uint256 i; i < blackJackGames.length; i++){
+            uint256[2] memory bothHands = calculateBothHands(i);
+            handsGamblers[i] = bothHands[0];
+            handsDealer[i] = bothHands[1];
+        }
+        return (handsGamblers, handsDealer);
+    }
+
+    function draw1CardDealer(uint256 gameIndex) private{
+        uint256 newCardValue = getRandomCard();
+        blackJackGames[gameIndex].dealerCards.push(newCardValue); 
+    }
+
+    function stand() public{
+        uint256 gameIndex = getGameIndex(msg.sender);
+        while(calculateValueOfHand(gameIndex, false)<17){
+            draw1CardDealer(gameIndex);
+        }
+        uint256 valueGambler = calculateValueOfHand(gameIndex, true);
+        uint256 valueDealer = calculateValueOfHand(gameIndex, false);
+        if(valueDealer > 21){win(gameIndex, msg.sender, blackJackGames[gameIndex].stake);}
+        else{
+            if(valueGambler > valueDealer){win(gameIndex, msg.sender, blackJackGames[gameIndex].stake);}
+            if(valueGambler < valueDealer){lost(gameIndex, blackJackGames[gameIndex].stake);}
+            if(valueGambler < valueDealer){tie(gameIndex, msg.sender, blackJackGames[gameIndex].stake);}
+        }
+    }
+
 }
