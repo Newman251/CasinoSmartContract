@@ -19,9 +19,9 @@ contract casino is mortal{
 
     //Initialize the contract. The casino owner deploys the contract by adding Tokens to his account.
     //As he needs to be able to pay a lot of gamblers, he needs a sufficient enough start capital
-    constructor (uint casinoInitialisationBalance) public {
-        require(casinoInitialisationBalance > 10000, "You must invest more than 10000");
-        tokenList memory newTokenList = tokenList(msg.sender, casinoInitialisationBalance/rate);
+    constructor () public payable {
+        require(msg.value > 10000, "You must invest more than 10000");
+        tokenList memory newTokenList = tokenList(msg.sender, msg.value/rate);
         tokenLists.push(newTokenList); //The casion owner is inserted as the first entry in the tokenLists
     }
 

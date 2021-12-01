@@ -20,10 +20,10 @@ contract bank is mortal{
 
     uint rate = 10;
 
-    constructor (uint casinoInitialisationBalance) public {
+    constructor () public payable {
 
-        require(casinoInitialisationBalance > 10000, "You must invest more than 10000");
-        tokenList memory newTokenList = tokenList(msg.sender, casinoInitialisationBalance/rate);
+        require(msg.value > 10000, "You must invest more than 10000");
+        tokenList memory newTokenList = tokenList(msg.sender, msg.value/rate);
         tokenLists.push(newTokenList);
         
     }
