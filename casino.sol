@@ -95,9 +95,10 @@ contract casino is mortal{
     //Checks if enough money is in the accounts of the gambler as well as the casino
     function enoughMoneyForBid (uint256 toCheckCasino, uint256 toCheckGambler, address playerID) internal view returns (bool) {
         uint256 balanceCasino = getAccountBalance(msg.sender);
-        if(toCheckCasino < balanceCasino){return true;}     //If the casino does not have enough tokens, abort
+        if(toCheckCasino <= balanceCasino){return false;}       //If the casino does not have enough tokens, abort
         uint256 balanceGambler = getAccountBalance(playerID);
-        if(toCheckGambler <= balanceGambler){return false;} //If the gambler does not have enough tokens, abort
+        if(toCheckGambler < balanceGambler){return false;}      //If the gambler does not have enough tokens, abort
+        return true;
     }
 
     //For most casino games we need random numbers. Using keccak256 this function generates a number that is in range of {0; maxNum}
@@ -126,7 +127,7 @@ contract casino is mortal{
 
     uint[] slots = new uint[](4); //Declaring slot results array
     uint winSlots; //Win amount variable declared
-//Three different slot roll functions are requred to generate different results for each slot
+    //Three different slot roll functions are requred to generate different results for each slot
     function slotRoll() internal view returns (uint){
         uint result = (randomGenerate(10)+1);
         return result;
@@ -139,11 +140,11 @@ contract casino is mortal{
         uint result = (randomGenerate(397)%10+1);
         return result;
     }
-//function which prints the results from the slot roll in form |S|S|S|Winning
+    //function which prints the results from the slot roll in form |S|S|S|Winning
     function printSlotResults() public view returns (uint[] memory){
         return slots;
     }
-//Starting slot game Functions
+    //Starting slot game Functions
     function StartGameSlots (uint stake) public{
         address playerID = msg.sender;                  //ID of the player
         uint256 numCustomers = getNumberCustomers();    //The number of users registered in the casino
@@ -157,6 +158,7 @@ contract casino is mortal{
 
         //Check requirement
         require(bidIsUnderLimit(stake), "Your bid is not in the range of allowed bids!");
+        require(enoughMoneyForBid (stake*9, stake, playerID),  "Either you or the casino do not have enough tokens to perform this game!");
         //getting result for each slot
         slots[0] = slotRoll();
         slots[1] = slotRoll2();
@@ -283,7 +285,7 @@ contract casino is mortal{
             tokenLists[index].amount += winRoulette; 
             tokenLists[0].amount -= winRoulette;
         }
-//if both colour and number are guessed right, multiply winnings by two
+    //if both colour and number are guessed right, multiply winnings by two
         if (number == rouletteNumber && keccak256(bytes(colour)) == keccak256(bytes(rouletteColour))){ 
             winRoulette = 2*(winRoulette*colourMatchMmultiplier + winRoulette*numberMatchMmultiplier);
             tokenLists[index].amount += winRoulette; 
@@ -291,7 +293,7 @@ contract casino is mortal{
             tokenLists[index].amount += winRoulette; 
             tokenLists[0].amount -= winRoulette;
         }
-//check to see if user has lost then subtract the stake if so
+    //check to see if user has lost then subtract the stake if so
         if (number != rouletteNumber && (keccak256(bytes(colour)) != keccak256(bytes(rouletteColour)))){
             tokenLists[0].amount += stake;
             tokenLists[index].amount -= stake;
