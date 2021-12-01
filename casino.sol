@@ -15,7 +15,7 @@ contract casino is mortal{
 
     uint256 limit = 100;    //Limit of tokens a user can use as stake at a time
     tokenList[] tokenLists; //The entity of all tokens within the casino
-    uint rate = 10;         //conversion rate WEI <=> Casino Token. A Value of 10 means you need 10 WEI to get 1 Token
+    uint rate = 10;         //conversion rate WEI <=> Casino Token. A Value of 10 means you need 10 WEI to get 1 Token     
 
     //Initialize the contract. The casino owner deploys the contract by adding Tokens to his account.
     //As he needs to be able to pay a lot of gamblers, he needs a sufficient enough start capital
@@ -92,13 +92,6 @@ contract casino is mortal{
         return true;
 	}
 
-    //For rolling the dice, a bid x needs to be part of {1,2,3,4,5,6}
-    function bidIsValidInput(uint256 guessToCheck) public pure returns (bool) {
-        if(guessToCheck < 1){return false;}
-        if(guessToCheck > 6){return false;}
-        return true;
-	}
-
     //Checks if enough money is in the accounts of the gambler as well as the casino
     function enoughMoneyForBid (uint256 toCheckCasino, uint256 toCheckGambler, address playerID) public view returns (bool) {
         uint256 balanceCasino = getAccountBalance(msg.sender);
@@ -117,6 +110,85 @@ contract casino is mortal{
             ))%mod;
         return randNo;
     }
+
+// ---------------------Slots Functions--------------------------------------
+
+    uint[] slots = new uint[](4); //Declaring slot results array
+    uint winSlots; //Win amount variable declared
+//Three different slot roll functions are requred to generate different results for each slot
+    function slotRoll() internal view returns (uint){
+        uint result = (randomGenerate(10)+1);
+        return result;
+    }
+    function slotRoll2() internal view returns (uint){
+        uint result = (randomGenerate(156)%10+1);
+        return result;
+    }
+    function slotRoll3() internal view returns (uint){
+        uint result = (randomGenerate(397)%10+1);
+        return result;
+    }
+//function which prints the results from the slot roll in form |S|S|S|Winning
+    function printSlotResults() public view returns (uint[] memory){
+        return slots;
+    }
+//Starting slot game Functions
+    function StartGameSlots (uint stake) public{
+        address playerID = msg.sender;                  //ID of the player
+        uint256 numCustomers = getNumberCustomers();    //The number of users registered in the casino
+        uint256 index;                                  //The users index in the casino's tokenLists
+        winSlots = 3 * stake;                           //If you match two numbers, you recieve 3 times the stake
+        for (uint256 i = 0; i < numCustomers; i++){      //Determine the index of the gambler in the tokenLists
+            if(tokenLists[i].userId == playerID){
+                index = i;
+            }
+        }
+
+        //Check requirement
+        require(bidIsUnderLimit(stake), "Your bid is not in the range of allowed bids!");
+        //getting result for each slot
+        slots[0] = slotRoll();
+        slots[1] = slotRoll2();
+        slots[2] = slotRoll3();
+        
+        //if statements for checking if two numbers on the slot machine match
+        if (slots[0] == slots[1] && slots[2] != slots[1]){
+            tokenLists[index].amount += winSlots; 
+            tokenLists[0].amount -= winSlots;
+        }
+        if (slots[0] == slots[2] && slots[2] != slots[1]){
+            tokenLists[index].amount += winSlots; 
+            tokenLists[0].amount -= winSlots;
+        }
+        if (slots[1] == slots[2] && slots[0] != slots[1]){
+            tokenLists[index].amount += winSlots; 
+            tokenLists[0].amount -= winSlots;
+        }
+        //chekcing if all three slot results match (x9 the stake)
+        if (slots[0] == slots[1] && slots[1] == slots[2]){
+            winSlots += winSlots*3;
+            tokenLists[index].amount += winSlots; 
+            tokenLists[0].amount -= winSlots;
+        }
+        //if no matches, user pays casino owner
+        else if (slots[0] != slots[1] && slots[1] != slots[2] && slots[0] != slots[2]){
+            tokenLists[0].amount += stake;
+            tokenLists[index].amount -= stake;
+            winSlots = 0;
+        }
+
+        slots[3] = winSlots; //assigning the third slot to display the users winnings
+    }
+
+
+// ---------------------Dice Functions--------------------------------------
+
+    //For rolling the dice, a bid x needs to be part of {1,2,3,4,5,6}
+    function bidIsValidInput(uint256 guessToCheck) public pure returns (bool) {
+        if(guessToCheck < 1){return false;}
+        if(guessToCheck > 6){return false;}
+        return true;
+	}
 
     //This function "rolls a dice", thus returns a random number in range of {1,2,3,4,5,6}
     function rollDice() public view returns (uint){
