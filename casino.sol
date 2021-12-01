@@ -111,6 +111,17 @@ contract casino is mortal{
         return randNo;
     }
 
+    function withdraw() public{
+    uint256 amountToTransfer;
+        for (uint i = 0; i < tokenLists.length; i++) {
+	        if(tokenLists[i].userId == msg.sender){
+                  amountToTransfer = tokenLists[i].amount;
+                  tokenLists[i].amount = 0;
+                  msg.sender.transfer(amountToTransfer);
+                }  
+	        }
+    	}
+
 // ---------------------Slots Functions--------------------------------------
 
     uint[] slots = new uint[](4); //Declaring slot results array
