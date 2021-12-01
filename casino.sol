@@ -110,14 +110,14 @@ contract casino is mortal{
             ))%mod;
         return randNo;
     }
-
+    //withdraw function for exchanging tokens to currency
     function withdraw() public{
     uint256 amountToTransfer;
         for (uint i = 0; i < tokenLists.length; i++) {
-	        if(tokenLists[i].userId == msg.sender){
+	        if(tokenLists[i].userId == msg.sender){ //finding the user who wants to withdraw
                   amountToTransfer = tokenLists[i].amount;
                   tokenLists[i].amount = 0;
-                  msg.sender.transfer(amountToTransfer);
+                  msg.sender.transfer(amountToTransfer*rate); //sending back the amount of wei owed (tokens * rate)
                 }  
 	        }
     	}
