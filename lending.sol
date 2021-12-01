@@ -10,7 +10,10 @@ contract mortal {
     function kill() public { if (msg.sender == owner) selfdestruct(owner); }
 }
 
-contract lending is mortal {
+contract lending is casino {
+
+    // insert contract address of casino contract that was just deployed
+    casino myCasino = new casino();
     struct loan {
 		address payable account;    // address of broke person
 		uint256 amountLended;             // loan amount
@@ -18,7 +21,7 @@ contract lending is mortal {
         uint256 amountToPayBack;            // amount that has to be paid back (including interest)
 	}
 
-        struct tokenList{
+    /*    struct tokenList{
         address userId;     //WalletID of the user. The first wallet is always the casino owner (It is initialized when deploying the contract)
         uint amount;        //Amount of casino tokens a user has in their wallet
     }
@@ -121,6 +124,8 @@ contract lending is mortal {
             ))%mod;
         return randNo;
     }
+
+    */
      
     loan[] acceptedLoans;
     loan[] requestedLoans;
@@ -132,22 +137,18 @@ contract lending is mortal {
        // debtBalances[msg.sender] = 0;  
     //}
     
+    
    
-
+    // the token balance of the owner of the contract (the casino)
     function getBalanceOfOwnerAddress() public view returns (uint256) {
-		// the token balance of the owner of the contract
+		
         uint256 balance;
         balance = tokenLists[0].amount;
 		return balance;
 	}
 
-    function getBalanceOfUserAddress() public view returns (uint256) {
-		// the balance of the owner of the contract
-		// returns the balance of the owner's address outside this contract
-		return msg.sender.balance;
-	}
 
-
+    // requesting Loan by proposing an amount and interest rate 
     function requestLoan (uint256 amountSuggestion, uint256 interestSuggestion) public payable{
         require(amountSuggestion > 100, "You must lend more than 100");
         require(amountSuggestion < 10000, "You cannot lend more than 10000");
@@ -174,6 +175,7 @@ contract lending is mortal {
 
     }
 
+    // the casino can accept a Loan request by inserting the players address and a boolean (true = accept) and (false = reject)
     function acceptLoan (address payable userAdress, bool accept) public{
         require((accept == false || accept == true), "The value must be either 0 (not accept) or 1 (accept)");
         require(debtBalances[userAdress] == 0, "Your still in debt. Please pay for your past loans first");
@@ -219,7 +221,7 @@ contract lending is mortal {
         }
     }
 
-
+    // pay back your loan by inserting your own account address and the amount you would like to pay back
     function payBack (address myAdress, uint amountInToken) public payable{
         require(amountInToken <= debtBalances[myAdress], "You cannot pay back more than you lent");
         
