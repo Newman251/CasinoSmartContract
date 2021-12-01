@@ -19,9 +19,9 @@ contract casino is mortal{
 
     //Initialize the contract. The casino owner deploys the contract by adding Tokens to his account.
     //As he needs to be able to pay a lot of gamblers, he needs a sufficient enough start capital
-    constructor (uint casinoInitialisationBalance) public {
-        require(casinoInitialisationBalance > 10000, "You must invest more than 10000");
-        tokenList memory newTokenList = tokenList(msg.sender, casinoInitialisationBalance/rate);
+    constructor () public payable {
+        require(msg.value > 10000, "You must invest more than 10000");
+        tokenList memory newTokenList = tokenList(msg.sender, msg.value/rate);
         tokenLists.push(newTokenList); //The casion owner is inserted as the first entry in the tokenLists
     }
 
@@ -64,7 +64,7 @@ contract casino is mortal{
     }    
 
     //Get the number of customers. Remember that the casino owner is listed here as well
-    function getNumberCustomers() public view returns (uint256){
+    function getNumberCustomers() internal view returns (uint256){
         return tokenLists.length;
     }
 
@@ -81,19 +81,19 @@ contract casino is mortal{
     }
 
     //Returns the balance of the person who calls the function
-    function getMyAccountBalance() public view returns (uint256){
+    function getMyAccountBalance() internal view returns (uint256){
         getAccountBalance(msg.sender);
     }
 
 	//Make sure the bid is under the casino's stake limit
-    function bidIsUnderLimit(uint256 stake) public view returns (bool) {
+    function bidIsUnderLimit(uint256 stake) internal view returns (bool) {
         if(stake < 1){return false;}
         if(stake > limit){return false;}
         return true;
 	}
 
     //Checks if enough money is in the accounts of the gambler as well as the casino
-    function enoughMoneyForBid (uint256 toCheckCasino, uint256 toCheckGambler, address playerID) public view returns (bool) {
+    function enoughMoneyForBid (uint256 toCheckCasino, uint256 toCheckGambler, address playerID) internal view returns (bool) {
         uint256 balanceCasino = getAccountBalance(msg.sender);
         if(toCheckCasino < balanceCasino){return true;}     //If the casino does not have enough tokens, abort
         uint256 balanceGambler = getAccountBalance(playerID);
@@ -110,6 +110,17 @@ contract casino is mortal{
             ))%mod;
         return randNo;
     }
+    //withdraw function for exchanging tokens to currency
+    function withdraw() public{
+    uint256 amountToTransfer;
+        for (uint i = 0; i < tokenLists.length; i++) {
+	        if(tokenLists[i].userId == msg.sender){ //finding the user who wants to withdraw
+                  amountToTransfer = tokenLists[i].amount;
+                  tokenLists[i].amount = 0;
+                  msg.sender.transfer(amountToTransfer*rate); //sending back the amount of wei owed (tokens * rate)
+                }  
+	        }
+    	}
 
 // ---------------------Slots Functions--------------------------------------
 
@@ -150,17 +161,8 @@ contract casino is mortal{
         slots[0] = slotRoll();
         slots[1] = slotRoll2();
         slots[2] = slotRoll3();
-        
         //if statements for checking if two numbers on the slot machine match
-        if (slots[0] == slots[1] && slots[2] != slots[1]){
-            tokenLists[index].amount += winSlots; 
-            tokenLists[0].amount -= winSlots;
-        }
-        if (slots[0] == slots[2] && slots[2] != slots[1]){
-            tokenLists[index].amount += winSlots; 
-            tokenLists[0].amount -= winSlots;
-        }
-        if (slots[1] == slots[2] && slots[0] != slots[1]){
+        if (slots[0] == slots[1] && slots[2] != slots[1] || slots[0] == slots[2] && slots[2] != slots[1] || slots[1] == slots[2] && slots[0] != slots[1]){
             tokenLists[index].amount += winSlots; 
             tokenLists[0].amount -= winSlots;
         }
@@ -184,7 +186,7 @@ contract casino is mortal{
 // ---------------------Dice Functions--------------------------------------
 
     //For rolling the dice, a bid x needs to be part of {1,2,3,4,5,6}
-    function bidIsValidInput(uint256 guessToCheck) public pure returns (bool) {
+    function bidIsValidInput(uint256 guessToCheck) internal pure returns (bool) {
         if(guessToCheck < 1){return false;}
         if(guessToCheck > 6){return false;}
         return true;
@@ -226,6 +228,74 @@ contract casino is mortal{
         else{
             tokenLists[0].amount += stake;
             tokenLists[index].amount -= stake;
+        }
+    }
+
+// ----------------------------------Roulette Functions-------------------------------------
+    uint rouletteNumber;
+    string rouletteColour;
+    uint winRoulette;
+
+    function printRouletteNumber() public view returns (uint){
+        return rouletteNumber;
+    }
+    function printRouletteColour() public view returns (string memory){
+        return rouletteColour;
+    }
+    function printRouletteWinnings() public view returns (uint){
+        return winRoulette;
+    }
+
+
+    function StartGameRoulette (uint number, string memory colour, uint stake) public {
+
+    require(number > 0, "You must guess between 1 and 36"); //If number is too low
+    require(number <= 36 , "You must guess between 1 and 36"); //If number is too high
+    //checking to see if the colour guess is right
+    require(keccak256(bytes(colour)) == keccak256(bytes("r")) || keccak256(bytes(colour)) == keccak256(bytes("b"))  , "You must guess either red 'r' or black 'b'");
+    require(bidIsUnderLimit(stake), "Your bid is not in the range of allowed bids!"); //checking if stake is ok
+
+        address playerID = msg.sender; //same as dice
+        uint256 numCustomers = getNumberCustomers(); //same as dice
+        uint256 index; //same as Dice
+        uint colourMatchMmultiplier;
+        uint numberMatchMmultiplier;
+        winRoulette = stake; //initialising winnings as the stake
+        colourMatchMmultiplier = 2; //multiplier is 2 for correct colour
+        numberMatchMmultiplier = 30; //multiplier is 30 fir correct number
+        for (uint256 i = 0; i < numCustomers; i++){ //check number of customers
+            if(tokenLists[i].userId == playerID){
+                index = i;
+            }
+        }
+        uint rOrB; 
+        rOrB = randomGenerate(2) + 1; //generating random colour
+        if(rOrB == 1){rouletteColour = "r";}else{rouletteColour = "b";} //converting to colour
+        rouletteNumber = randomGenerate(37); //generating random number (0-36)
+
+        if (keccak256(bytes(colour)) == keccak256(bytes(rouletteColour))){ //assigning winnings if colour guessed right
+            winRoulette = winRoulette*colourMatchMmultiplier;
+            tokenLists[index].amount += winRoulette; 
+            tokenLists[0].amount -= winRoulette;
+        }
+        if (number == rouletteNumber){// assigning winning if number guessed right
+            winRoulette = winRoulette*numberMatchMmultiplier;
+            tokenLists[index].amount += winRoulette; 
+            tokenLists[0].amount -= winRoulette;
+        }
+//if both colour and number are guessed right, multiply winnings by two
+        if (number == rouletteNumber && keccak256(bytes(colour)) == keccak256(bytes(rouletteColour))){ 
+            winRoulette = 2*(winRoulette*colourMatchMmultiplier + winRoulette*numberMatchMmultiplier);
+            tokenLists[index].amount += winRoulette; 
+            tokenLists[0].amount -= winRoulette;
+            tokenLists[index].amount += winRoulette; 
+            tokenLists[0].amount -= winRoulette;
+        }
+//check to see if user has lost then subtract the stake if so
+        if (number != rouletteNumber && (keccak256(bytes(colour)) != keccak256(bytes(rouletteColour)))){
+            tokenLists[0].amount += stake;
+            tokenLists[index].amount -= stake;
+            winRoulette = 0;
         }
     }
 }
