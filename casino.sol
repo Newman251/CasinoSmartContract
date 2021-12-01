@@ -241,18 +241,17 @@ contract casino is mortal{
     require(number > 0, "You must guess between 1 and 36"); //If number is too low
     require(number <= 36 , "You must guess between 1 and 36"); //If number is too high
     //checking to see if the colour guess is right
-    require(keccak256(bytes(colour)) == keccak256(bytes("r")) || keccak256(bytes(colour)) == keccak256(bytes("b"))  , "You must guess between 1 and 36");
+    require(keccak256(bytes(colour)) == keccak256(bytes("r")) || keccak256(bytes(colour)) == keccak256(bytes("b"))  , "You must guess either red 'r' or black 'b'");
     require(bidIsUnderLimit(stake), "Your bid is not in the range of allowed bids!"); //checking if stake is ok
-
 
         address playerID = msg.sender; //same as dice
         uint256 numCustomers = getNumberCustomers(); //same as dice
         uint256 index; //same as Dice
         uint colourMatchMmultiplier;
         uint numberMatchMmultiplier;
-        winRoulette = stake;
-        colourMatchMmultiplier = 2;
-        numberMatchMmultiplier = 30;
+        winRoulette = stake; //initialising winnings as the stake
+        colourMatchMmultiplier = 2; //multiplier is 2 for correct colour
+        numberMatchMmultiplier = 30; //multiplier is 30 fir correct number
         for (uint256 i = 0; i < numCustomers; i++){ //check number of customers
             if(tokenLists[i].userId == playerID){
                 index = i;
