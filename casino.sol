@@ -64,7 +64,7 @@ contract casino is mortal{
     }    
 
     //Get the number of customers. Remember that the casino owner is listed here as well
-    function getNumberCustomers() public view returns (uint256){
+    function getNumberCustomers() internal view returns (uint256){
         return tokenLists.length;
     }
 
@@ -81,19 +81,19 @@ contract casino is mortal{
     }
 
     //Returns the balance of the person who calls the function
-    function getMyAccountBalance() public view returns (uint256){
+    function getMyAccountBalance() internal view returns (uint256){
         getAccountBalance(msg.sender);
     }
 
 	//Make sure the bid is under the casino's stake limit
-    function bidIsUnderLimit(uint256 stake) public view returns (bool) {
+    function bidIsUnderLimit(uint256 stake) internal view returns (bool) {
         if(stake < 1){return false;}
         if(stake > limit){return false;}
         return true;
 	}
 
     //Checks if enough money is in the accounts of the gambler as well as the casino
-    function enoughMoneyForBid (uint256 toCheckCasino, uint256 toCheckGambler, address playerID) public view returns (bool) {
+    function enoughMoneyForBid (uint256 toCheckCasino, uint256 toCheckGambler, address playerID) internal view returns (bool) {
         uint256 balanceCasino = getAccountBalance(msg.sender);
         if(toCheckCasino < balanceCasino){return true;}     //If the casino does not have enough tokens, abort
         uint256 balanceGambler = getAccountBalance(playerID);
@@ -186,7 +186,7 @@ contract casino is mortal{
 // ---------------------Dice Functions--------------------------------------
 
     //For rolling the dice, a bid x needs to be part of {1,2,3,4,5,6}
-    function bidIsValidInput(uint256 guessToCheck) public pure returns (bool) {
+    function bidIsValidInput(uint256 guessToCheck) internal pure returns (bool) {
         if(guessToCheck < 1){return false;}
         if(guessToCheck > 6){return false;}
         return true;
