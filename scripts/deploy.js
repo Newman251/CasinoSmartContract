@@ -1,13 +1,11 @@
+//  How To Deploy Our Contract to the Blockchain?
 
 const hre = require("hardhat");
 
 async function main() {
   const [deployer] = await hre.ethers.getSigners();
 
-  console.log(
-    "Deploying contracts with the account:",
-    deployer.address
-  );
+  console.log( "Deploying contracts with the account:", deployer.address);
   
   
   const Casino = await hre.ethers.getContractFactory("Casino");
@@ -15,7 +13,7 @@ async function main() {
   
   await casino.deployed();
 
-  console.log("Token deployed to:", casino.address);
+  console.log("Contract deployed to:", casino.address);
 }
 
 main()
