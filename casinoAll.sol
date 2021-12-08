@@ -109,10 +109,10 @@ contract casino is mortal{
 
     //Checks if enough money is in the accounts of the gambler as well as the casino
     function enoughMoneyForBid (uint256 toCheckCasino, uint256 toCheckGambler, address playerID) internal view returns (bool) {
-        uint256 balanceCasino = getAccountBalance(msg.sender);
-        if(toCheckCasino <= balanceCasino){return false;}       //If the casino does not have enough tokens, abort
+        uint256 balanceCasino = tokenLists[0].amount;
+        if(toCheckCasino > balanceCasino){return false;}       //If the casino does not have enough tokens, abort
         uint256 balanceGambler = getAccountBalance(playerID);
-        if(toCheckGambler < balanceGambler){return false;}      //If the gambler does not have enough tokens, abort
+        if(toCheckGambler > balanceGambler){return false;}      //If the gambler does not have enough tokens, abort
         return true;
     }
 
@@ -173,7 +173,7 @@ contract casino is mortal{
 
         //Check requirement
         require(bidIsUnderLimit(stake), "Your bid is not in the range of allowed bids!");
-        //require(enoughMoneyForBid (stake*9, stake, playerID),  "Either you or the casino do not have enough tokens to perform this game!");
+        require(enoughMoneyForBid (stake*9, stake, playerID),  "Either you or the casino do not have enough tokens to perform this game!");
         //getting result for each slot
         slots[0] = slotRoll();
         slots[1] = slotRoll2();
@@ -359,30 +359,6 @@ contract casino is mortal{
         }
     }
 
-    /*
-    function uint2str(uint _i) internal pure returns (string memory _uintAsString) {
-        if (_i == 0) {
-            return "0";
-        }
-        uint j = _i;
-        uint len;
-        while (j != 0) {
-            len++;
-            j /= 10;
-        }
-        bytes memory bstr = new bytes(len);
-        uint k = len;
-        while (_i != 0) {
-            k = k-1;
-            uint8 temp = (48 + uint8(_i - _i / 10 * 10));
-            bytes1 b1 = bytes1(temp);
-            bstr[k] = b1;
-            _i /= 10;
-        }
-        return string(bstr);
-    }
-    */
-
     //This function returns a random number between 0 and 12 which represents our cards
     function getRandomCard() private view returns (uint256){
         uint cardResult = randomGenerate(12);
@@ -408,9 +384,9 @@ contract casino is mortal{
 
     //This function is the start to a blackjack game. It distributes the first cards.
     //We simplified blackjack a bit: Every card is there infinite times, and an Ace is always worth 11.
-    function StartGameBlackjack (uint256 stake) public payable{
+    function StartGameBlackjack (uint256 stake) public{
         address playerID = msg.sender;                      //The player is the one who started the game
-        require(enoughMoneyForBid(stake, stake, playerID)); //Every party has to have enough tokens to perform the results of the game
+        require(enoughMoneyForBid(stake, stake, playerID), "Someone does no have suffiecient funds"); //Every party has to have enough tokens to perform the results of the game
         tokenLists[0].amount -= stake;                      //Substract stake from the casino's accounts, it is now in the game 
         uint256 playerTokenID = getIndexOfGambler(msg.sender);//Get the index of the gambler in the tokenLists
         tokenLists[playerTokenID].amount -= stake;          //Substract the stake from the gambler's account
