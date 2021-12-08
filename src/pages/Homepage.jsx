@@ -46,13 +46,9 @@ function Homepage () {
       }
 
   return (
-        <div>
-           <div className="logo-container">
-
-
-               <Avatar src={icon} className="logo" size="large"/>
-           </div>
-       <Typography.Title level={5} style={{ color: 'darkblue', textAlign: 'center' ,fontSize:34}}>------Start to the Game------
+        <div >
+           
+       <Typography.Title level={9} style={{ flex:1,color: 'darkblue', textAlign: 'center' ,fontSize:34}}>------Start To The Game------
        <br /><br />
        
           

@@ -21,26 +21,26 @@ const App = () => (
             </Route>
             <Route exact path="/game1">
               <Game1 />
-            </Route>
+            </Route>{/*}
             <Route exact path="/game2">
               <Game2 />
             </Route>
             <Route exact path="/game3">
               <Game3 />
-            </Route>
+</Route>*/}
           
           </Switch>
         </div>
       </Layout>
 
-      <div className="footer">
+   {/*}   <div className="footer">
   
-       {/* <Space>
+        <Space>
           <Link to="/">Home</Link>
           <Link to="/game1">Game1</Link>
           <Link to="/game2">Game2</Link>
-       </Space> */}
-      </div>
+       </Space> 
+</div>*/}
     </div>
   </div>
 );
