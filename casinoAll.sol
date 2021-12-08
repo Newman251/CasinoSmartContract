@@ -60,9 +60,7 @@ contract casino is mortal{
         if(!userFound){
             tokenList memory newTokenList = tokenList(msg.sender, tokens);
             tokenLists.push(newTokenList);
-        }
-        //userFound = false;
-        
+        }        
     }
 
     //Return all casino accounts as well as their balances
@@ -178,7 +176,7 @@ contract casino is mortal{
         slots[0] = slotRoll();
         slots[1] = slotRoll2();
         slots[2] = slotRoll3();
-        //if statements for checking if two numbers on the slot machine match
+        // checking if two numbers on the slot machine match
         if (slots[0] == slots[1] && slots[2] != slots[1] || slots[0] == slots[2] && slots[2] != slots[1] || slots[1] == slots[2] && slots[0] != slots[1]){
             tokenLists[index].amount += winSlots; 
             tokenLists[0].amount -= winSlots;
@@ -195,10 +193,8 @@ contract casino is mortal{
             tokenLists[index].amount -= stake;
             winSlots = 0;
         }
-
         slots[3] = winSlots; //assigning the third slot to display the users winnings
     }
-
 
 // ---------------------Dice Functions--------------------------------------
 
@@ -249,6 +245,7 @@ contract casino is mortal{
     }
 
 // ----------------------------------Roulette Functions-------------------------------------
+
     uint rouletteNumber;
     string rouletteColour;
     uint winRoulette;
@@ -519,7 +516,6 @@ contract casino is mortal{
    
     // the token balance of the owner of the contract (the casino)
     function getBalanceOfOwnerAddress() public view returns (uint256) {
-		
         uint256 balance;
         balance = tokenLists[0].amount;
 		return balance;
@@ -550,7 +546,6 @@ contract casino is mortal{
         } else {
             require(!foundRequest, "You already requested a loan that hasn't been approved yet");
         }
-
     }
 
     // the casino can accept a Loan request by inserting the players address and a boolean (true = accept) and (false = reject)
@@ -567,7 +562,6 @@ contract casino is mortal{
 
                     loan memory newLoan = loan(userAdress, requestedLoans[i].amountLended, requestedLoans[i].interestRate, requestedLoans[i].amountToPayBack);
 		            acceptedLoans.push(newLoan); 
-
 
                     if (requestedLoans.length > 1){
                         delete requestedLoans[i];
@@ -675,7 +669,6 @@ contract casino is mortal{
 	    uint256[] memory allLoanAmounts = new uint256[](acceptedLoans.length);
 	    uint256[] memory allInterestRates = new uint256[](acceptedLoans.length);
 	    uint256[] memory allAmountToPayBack = new uint256[](acceptedLoans.length);
-	    
 	    
 	    for (uint i = 0; i < acceptedLoans.length; i++) {
 	        allAccounts[i] = acceptedLoans[i].account;
