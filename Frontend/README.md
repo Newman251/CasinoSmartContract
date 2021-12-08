@@ -5,7 +5,7 @@ Technologies:
 Solidity & Blockchain & React & Hardhat & Ethers.js & Metamask
 
 
---For to Launch--
+--To Launch the frontend--
 
 npx hardhat compile ->
 npx hardhat node ->
