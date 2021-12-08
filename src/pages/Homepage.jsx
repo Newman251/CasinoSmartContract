@@ -13,7 +13,7 @@ const casinoAddress= "0x5FbDB2315678afecb367f032d93F642f64180aa3"
 function Homepage () {
     const [userAccount, setUserAccount] = useState()
   const [amount, setAmount] = useState()
-  const [balance, setBalance] = useState("My Ct's")
+  const [balance, setBalance] = useState("Users Balance")
   //const [casinoBalance, setCasinoBalance] = useState("Casino's Tokens")
 
 
@@ -60,7 +60,16 @@ function Homepage () {
         <button onClick={sendCoins}>Send Coins</button>
         <br></br>
         <input onChange={e => setUserAccount(e.target.value)} placeholder="Account ID" />
+        <br/>
         <input onChange={e => setAmount(e.target.value)} placeholder="Amount" />
+        <br></br>
+        <br></br>
+        <br></br>
+        <br></br>
+        <br></br>
+        <br></br>
+
+
 </Typography.Title> 
         </div>
     );

@@ -123,7 +123,9 @@ const App = () => {
               Start Game
             </Button>
           </Stack>
+      
         </Flex>
+        
       )}
     </>
   );
