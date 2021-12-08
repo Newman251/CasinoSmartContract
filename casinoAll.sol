@@ -173,7 +173,7 @@ contract casino is mortal{
 
         //Check requirement
         require(bidIsUnderLimit(stake), "Your bid is not in the range of allowed bids!");
-        require(enoughMoneyForBid (stake*9, stake, playerID),  "Either you or the casino do not have enough tokens to perform this game!");
+        //require(enoughMoneyForBid (stake*9, stake, playerID),  "Either you or the casino do not have enough tokens to perform this game!");
         //getting result for each slot
         slots[0] = slotRoll();
         slots[1] = slotRoll2();
@@ -408,7 +408,7 @@ contract casino is mortal{
 
     //This function is the start to a blackjack game. It distributes the first cards.
     //We simplified blackjack a bit: Every card is there infinite times, and an Ace is always worth 11.
-    function StartGameBlackjack (uint256 stake) public{
+    function StartGameBlackjack (uint256 stake) public payable{
         address playerID = msg.sender;                      //The player is the one who started the game
         require(enoughMoneyForBid(stake, stake, playerID)); //Every party has to have enough tokens to perform the results of the game
         tokenLists[0].amount -= stake;                      //Substract stake from the casino's accounts, it is now in the game 
